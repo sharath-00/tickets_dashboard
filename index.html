@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Light Ticket Monitoring System</title>
+
+    <!-- Google Font -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Font Awesome -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+
+    <!-- Chart JS -->
+
+    <script src="vendor/chart.umd.min.js"></script>
+
+    <!-- Papa Parse -->
+
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+    <!-- CSS -->
+
+    <link rel="stylesheet" href="css/style.css">
+
+</head>
+
+<body>
+
+<!-- ==========================================================
+HEADER
+=========================================================== -->
+
+<header class="top-header">
+
+    <div class="logo-section">
+
+        <div class="logo-icon">
+
+            <i class="fa-solid fa-lightbulb"></i>
+
+        </div>
+
+        <div>
+
+            <h1>
+
+                Smart Light Ticket Monitoring System
+
+            </h1>
+
+            <p>
+
+                Real-Time Ticket Analytics Dashboard
+
+            </p>
+
+        </div>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="live-box">
+
+            <span class="live-dot"></span>
+
+            LIVE
+
+        </div>
+
+        <div class="header-info">
+
+            <span>CSV</span>
+
+            <strong id="csvName">
+
+                Waiting...
+
+            </strong>
+
+        </div>
+
+        <div class="header-info">
+
+            <span>Records</span>
+
+            <strong id="recordCount">
+
+                0
+
+            </strong>
+
+        </div>
+
+        <div class="header-info">
+
+            <span>Updated</span>
+
+            <strong id="lastRefresh">
+
+                --
+
+            </strong>
+
+        </div>
+
+        <div class="header-info">
+
+            <span>Time</span>
+
+            <strong id="clock">
+
+                --:--
+
+            </strong>
+
+        </div>
+
+        <button class="icon-btn">
+
+            <i class="fa-regular fa-bell"></i>
+
+        </button>
+
+        <button class="icon-btn">
+
+            <i class="fa-regular fa-circle-user"></i>
+
+        </button>
+
+    </div>
+
+</header>
+
+<!-- ==========================================================
+NAVIGATION
+=========================================================== -->
+
+<nav class="navbar">
+
+    <button class="nav-btn active" data-target="overviewSection">
+
+        <i class="fa-solid fa-chart-line"></i>
+
+        Dashboard
+
+    </button>
+
+    <button class="nav-btn" data-target="analyticsSection">
+
+        <i class="fa-solid fa-chart-pie"></i>
+
+        Analytics
+
+    </button>
+
+    <button class="nav-btn" data-target="ticketExplorerSection">
+
+        <i class="fa-solid fa-table"></i>
+
+        Tickets
+
+    <button class="nav-btn" data-target="noisyDevicesSection">
+
+        <i class="fa-solid fa-bell-slash"></i>
+
+        Flapping
+
+    </button>
+
+    <div class="nav-spacer"></div>
+
+    <button class="action-btn" id="clearBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+        <i class="fa-solid fa-trash-can"></i>
+        Clear Data
+    </button>
+
+    <button class="action-btn" id="uploadBtn">
+
+    <i class="fa-solid fa-upload"></i>
+
+    Upload CSV
+
+</button>
+
+    <button class="action-btn" id="exportBtn">
+
+        <i class="fa-solid fa-download"></i>
+
+        Export
+
+    </button>
+
+    <button class="action-btn" id="refreshBtn">
+
+        <i class="fa-solid fa-arrows-rotate"></i>
+
+        Refresh
+
+    </button>
+
+</nav>
+
+<div class="dashboard-container">
+        <!-- ==========================================================
+    FILTER TOOLBAR
+    =========================================================== -->
+
+    <section class="filter-toolbar">
+
+        <div class="filter-left">
+
+            <div class="filter-group">
+
+                <label>Region</label>
+
+                <select id="regionFilter">
+
+                    <option>All Regions</option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>Zone</label>
+
+                <select id="zoneFilter">
+
+                    <option>All Zones</option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>Ward</label>
+
+                <select id="wardFilter">
+
+                    <option>All Wards</option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>Priority</label>
+
+                <select id="priorityFilter">
+
+                    <option>All Priorities</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+        <!-- STATUS MULTI-SELECT FILTERS -->
+
+        <div class="filter-section">
+
+            <label>Status</label>
+
+            <div class="button-filter-group" id="statusFilterButtons">
+
+                <!-- Buttons will be populated by JavaScript -->
+
+            </div>
+
+        </div>
+
+        <!-- TICKET STATE MULTI-SELECT FILTERS -->
+
+        <div class="filter-section">
+
+            <label>Ticket State</label>
+
+            <div class="button-filter-group" id="ticketStateFilterButtons">
+
+                <button class="filter-button active" data-value="All">All</button>
+
+                <button class="filter-button" data-value="Opened">Opened</button>
+
+                <button class="filter-button" data-value="Closed">Closed</button>
+
+            </div>
+
+        </div>
+
+        <div class="filter-right">
+
+            <div class="search-box">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    type="text"
+                    id="ticketSearch"
+                    placeholder="Search Ticket, Device, Location...">
+
+            </div>
+
+            <button class="reset-btn" id="resetBtn">
+
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+
+                Reset
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================================
+    PAGE TITLE
+    =========================================================== -->
+
+    <section class="section-title" id="overviewSection">
+
+        <div>
+
+            <h2>Dashboard Overview</h2>
+
+            <p>
+
+                Monitor ticket statistics, performance metrics and regional
+                fault distribution.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==========================================================
+    KPI CARDS
+    =========================================================== -->
+
+    <section class="kpi-grid">
+
+
+        <!-- CARD 1 -->
+
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <div class="kpi-icon blue">
+
+                    <i class="fa-solid fa-ticket"></i>
+
+                </div>
+
+                <span class="trend positive">
+
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+
+                    +0%
+
+                </span>
+
+            </div>
+
+            <h2 id="totalTickets">
+
+                0
+
+            </h2>
+
+            <p>Total Tickets</p>
+
+            <div class="progress">
+
+                <div class="progress-fill blue"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CARD 2 -->
+
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <div class="kpi-icon green">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                </div>
+
+                <span class="trend positive">
+
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+
+                    +0%
+
+                </span>
+
+            </div>
+
+            <h2 id="closedTickets">
+
+                0
+
+            </h2>
+
+            <p>Closed Tickets</p>
+
+            <div class="progress">
+
+                <div class="progress-fill green"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CARD 3 -->
+
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <div class="kpi-icon orange">
+
+                    <i class="fa-solid fa-folder-open"></i>
+
+                </div>
+
+                <span class="trend warning">
+
+                    <i class="fa-solid fa-minus"></i>
+
+                    0%
+
+                </span>
+
+            </div>
+
+            <h2 id="openTickets">
+
+                0
+
+            </h2>
+
+            <p>Open Tickets</p>
+
+            <div class="progress">
+
+                <div class="progress-fill orange"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CARD 4 -->
+
+
+        <div class="kpi-card">
+
+            <div class="kpi-top">
+
+                <div class="kpi-icon red">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                </div>
+
+                <span class="trend negative">
+
+                    <i class="fa-solid fa-arrow-trend-down"></i>
+
+                    0%
+
+                </span>
+
+            </div>
+
+            <h2 id="criticalTickets">
+
+                0
+
+            </h2>
+
+            <p>Critical Tickets</p>
+
+            <div class="progress">
+
+                <div class="progress-fill red"></div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <!-- CARD 5 (SLA Compliance) -->
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-icon cyan">
+                    <i class="fa-solid fa-chart-simple"></i>
+                </div>
+                <span class="trend positive">
+                    Good
+                </span>
+            </div>
+            <h2 id="slaValue">
+                0%
+            </h2>
+            <p>SLA Compliance</p>
+            <div class="progress">
+                <div class="progress-fill cyan"></div>
+            </div>
+        </div>
+
+        <!-- CARD 6 (Avg Resolution Time / MTTR) -->
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-icon purple">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <span class="trend positive" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa;">
+                    MTTR
+                </span>
+            </div>
+            <h2 id="mttrValue">
+                0.0h
+            </h2>
+            <p>Avg Resolution Time</p>
+            <div class="progress">
+                <div class="progress-fill purple"></div>
+            </div>
+        </div>
+
+    </section>
+        <!-- ==========================================================
+    TICKET ANALYTICS
+    =========================================================== -->
+
+    <section class="section-title" id="analyticsSection">
+
+        <div>
+
+            <h2>Ticket Analytics</h2>
+
+            <p>
+
+                Analyze ticket trends, priorities, status distribution and
+                overall system performance.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ===================== ROW 1 ===================== -->
+
+    <section class="analytics-grid analytics-large">
+
+        <!-- Daily Trend -->
+
+        <div class="dashboard-card large-card">
+
+            <div class="card-header">
+                <div>
+                    <h3>
+                        <i class="fa-solid fa-chart-line"></i>
+                        Daily Ticket Trend
+                    </h3>
+                    <span id="trendDateRange">Last 7 Days</span>
+                </div>
+                <div class="trend-nav-controls" style="display: flex; gap: 8px; align-items: center;">
+                    <button class="action-btn secondary-btn" id="prevTrendBtn" style="padding: 6px 12px; font-size: 13px; min-width: unset; border-radius: 8px;">
+                        <i class="fa-solid fa-chevron-left"></i> Prev
+                    </button>
+                    <button class="action-btn secondary-btn" id="nextTrendBtn" style="padding: 6px 12px; font-size: 13px; min-width: unset; border-radius: 8px;">
+                        Next <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="ticketTrendChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- Priority -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-layer-group"></i>
+
+                        Priority Distribution
+
+                    </h3>
+
+                    <span>Current Tickets</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="priorityChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ===================== ROW 2 ===================== -->
+
+    <section class="analytics-grid">
+
+
+        <!-- Status -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-circle-info"></i>
+
+                        Status Distribution
+
+                    </h3>
+
+                    <span>Open vs Closed</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="statusChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- Resolution -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-clock"></i>
+
+                        Resolution Time
+
+                    </h3>
+
+                    <span>Average Resolution</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="resolutionChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- Problem -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        Top Problem Types
+
+                    </h3>
+
+                    <span>Top 10 Faults</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="problemChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <!-- Open Ticket Aging -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-hourglass-half"></i>
+
+                        Open Ticket Aging
+
+                    </h3>
+
+                    <span>Backlog Health</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="agingChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ==========================================================
+    REGIONAL ANALYTICS
+    =========================================================== -->
+
+    <section class="section-title">
+
+        <div>
+
+            <h2>Regional Analytics</h2>
+
+            <p>
+
+                Compare ticket statistics across regions, zones and wards.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <section class="analytics-grid">
+
+
+        <!-- Region -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-earth-asia"></i>
+
+                        Region Comparison
+
+                    </h3>
+
+                    <span>Tickets by Region</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="regionChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- Zone -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-map-location-dot"></i>
+
+                        Zone Comparison
+
+                    </h3>
+
+                    <span>Zone-wise Tickets</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="zoneChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+        <!-- Ward -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        Ward Analysis
+
+                    </h3>
+
+                    <span>Ward-wise Distribution</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-ellipsis"></i>
+
+                </button>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="wardChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ==========================================================
+    CRITICAL ALERTS
+    =========================================================== -->
+
+    <section class="section-title">
+
+        <div>
+
+            <h2>Critical Alerts</h2>
+
+            <p>
+
+                High priority faults requiring immediate attention.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <section class="alert-grid">
+
+        <!-- Critical Ticket List -->
+
+        <div class="dashboard-card large-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+
+                        Critical Tickets
+
+                    </h3>
+
+                    <span>Highest Priority Issues</span>
+
+                </div>
+
+                <button class="card-menu">
+
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+
+                </button>
+
+            </div>
+
+            <div class="critical-list">
+
+                <div class="critical-item">
+
+                    <div class="critical-left">
+
+                        <span class="critical-priority critical">Critical</span>
+
+                        <div>
+
+                            <h4>Ticket #---</h4>
+
+                            <p>Waiting for CSV Upload</p>
+
+                        </div>
+
+                    </div>
+
+                    <span class="critical-age">-- hrs</span>
+
+                </div>
+
+                <div class="critical-item">
+
+                    <div class="critical-left">
+
+                        <span class="critical-priority major">Major</span>
+
+                        <div>
+
+                            <h4>Ticket #---</h4>
+
+                            <p>Waiting for CSV Upload</p>
+
+                        </div>
+
+                    </div>
+
+                    <span class="critical-age">-- hrs</span>
+
+                </div>
+
+                <div class="critical-item">
+
+                    <div class="critical-left">
+
+                        <span class="critical-priority minor">Minor</span>
+
+                        <div>
+
+                            <h4>Ticket #---</h4>
+
+                            <p>Waiting for CSV Upload</p>
+
+                        </div>
+
+                    </div>
+
+                    <span class="critical-age">-- hrs</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Activity Timeline -->
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+
+                        Recent Activity
+
+                    </h3>
+
+                    <span>Latest Updates</span>
+
+                </div>
+
+            </div>
+
+            <div class="timeline">
+
+                <div class="timeline-item">
+
+                    <div class="timeline-dot"></div>
+
+                    <div>
+
+                        <h4>Dashboard Initialized</h4>
+
+                        <p>Waiting for ticket data...</p>
+
+                    </div>
+
+                </div>
+
+                <div class="timeline-item">
+
+                    <div class="timeline-dot"></div>
+
+                    <div>
+
+                        <h4>CSV Upload</h4>
+
+                        <p>No file uploaded.</p>
+
+                    </div>
+
+                </div>
+
+                <div class="timeline-item">
+
+                    <div class="timeline-dot"></div>
+
+                    <div>
+
+                        <h4>Analytics Engine</h4>
+
+                        <p>Idle</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ==========================================================
+    CHRONIC TICKETS
+    =========================================================== -->
+
+    <section class="section-title" id="chronicTicketsSection">
+
+        <div>
+
+            <h2>Chronic-Offender Assets</h2>
+
+            <p>
+
+                Panels with repeated tickets in the active filter set. Treat these as inspection or replacement candidates.
+
+            </p>
+
+        </div>
+
+    </section>
+
+    <section class="table-section">
+
+        <div class="dashboard-card large-card table-card">
+
+            <div class="table-wrapper">
+
+                <table id="chronicOffenderTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Asset / Panel</th>
+
+                            <th>Tickets</th>
+
+                            <th>Primary Fault</th>
+
+                            <th>Last 3 Problem Types</th>
+
+                            <th>Last Seen</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="chronicDeviceList">
+
+                        <tr>
+
+                            <td colspan="6" style="text-align:center;padding:40px;">
+
+                                Waiting for CSV Upload...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <div id="chronicInsightReport" class="dashboard-card large-card table-card" style="margin-top: 20px; padding: 25px; display: none;">
+            <h3 style="margin-top: 0; color: var(--white); font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-triangle-exclamation" style="color: var(--primary);"></i> Chronic Offender Insight Report
+            </h3>
+            <div id="chronicInsightContent" style="color: var(--muted); font-size: 14px; line-height: 1.6;">
+                <!-- Dynamically populated via JS -->
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ==========================================================
+    NOISY DEVICES (ALERT FLAPPING)
+    =========================================================== -->
+
+    <section class="section-title" id="noisyDevicesSection">
+
+        <div>
+
+            <h2>Noisy Devices (Alert Flapping)</h2>
+
+            <p>
+
+                Panels with high frequency of tickets within any 24-hour window, indicating unstable relays or communication storms.
+
+            </p>
+
+        </div>
+
+    </section>
+
+    <section class="table-section">
+
+        <div class="dashboard-card large-card table-card">
+
+            <div class="table-wrapper">
+
+                <table id="noisyDeviceTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Asset / Panel</th>
+
+                            <th>Max Flap Rate (24h)</th>
+
+                            <th>Total Tickets</th>
+
+                            <th>Primary Fault</th>
+
+                            <th>Auto-Close Rate (<5m)</th>
+
+                            <th>Action Recommendation</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="noisyDeviceList">
+
+                        <tr>
+
+                            <td colspan="6" style="text-align:center;padding:40px;">
+
+                                Waiting for CSV Upload...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ==========================================================
+    DEVICE SUMMARY
+    =========================================================== -->
+
+    <section class="section-title">
+
+        <div>
+
+            <h2>Device Summary</h2>
+
+            <p>
+
+                Device statistics and communication health.
+
+            </p>
+
+        </div>
+
+    </section>
+
+    <section class="analytics-grid">
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-microchip"></i>
+
+                        Device Types
+
+                    </h3>
+
+                    <span>SLC / ILM</span>
+
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="deviceChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-signal"></i>
+
+                        Communication Status
+
+                    </h3>
+
+                    <span>Device Connectivity</span>
+
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="communicationChart"></canvas>
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <div class="card-header">
+
+                <div>
+
+                    <h3>
+
+                        <i class="fa-solid fa-server"></i>
+
+                        Fault Distribution
+
+                    </h3>
+
+                    <span>Overall Health</span>
+
+                </div>
+
+            </div>
+
+            <div class="chart-container">
+
+                <canvas id="faultDistributionChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ==========================================================
+    TICKET EXPLORER
+    =========================================================== -->
+
+    <section class="section-title" id="ticketExplorerSection">
+
+        <div>
+
+            <h2>Ticket Explorer</h2>
+
+            <p>
+
+                View and search complete ticket details.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <section class="table-section">
+
+        <div class="table-toolbar">
+
+            <div class="table-search">
+
+                <i class="fa-solid fa-magnifying-glass"></i>
+
+                <input
+                    id="ticketSearch"
+                    type="text"
+                    placeholder="Search tickets...">
+
+            </div>
+
+            <div class="table-actions">
+
+                <button>
+
+                    <i class="fa-solid fa-download"></i>
+
+                    Export
+
+                </button>
+
+                <button>
+
+                    <i class="fa-solid fa-print"></i>
+
+                    Print
+
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="table-wrapper">
+
+            <table id="ticketTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Ticket</th>
+
+                        <th>Region</th>
+
+                        <th>Zone</th>
+
+                        <th>Ward</th>
+
+                        <th>Problem</th>
+
+                        <th>Priority</th>
+
+                        <th>Status</th>
+
+                        <th>Opened</th>
+
+                        <th>Resolution</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <tr>
+
+                        <td colspan="9"
+                            style="text-align:center;padding:60px;">
+
+                            Waiting for CSV Upload...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div id="pagination" class="pagination"></div>
+
+    </section>
+        <!-- ==========================================================
+    FOOTER
+    =========================================================== -->
+
+    <footer class="footer">
+
+        <div class="footer-left">
+
+            <h3>
+
+                Smart Light Ticket Monitoring System
+
+            </h3>
+
+            <p>
+
+                Intelligent Monitoring • Ticket Analytics • Regional Insights
+
+            </p>
+
+        </div>
+
+        <div class="footer-right">
+
+            <div class="footer-item">
+
+                <span>Version</span>
+
+                <strong>1.0.0</strong>
+
+            </div>
+
+            <div class="footer-item">
+
+                <span>Environment</span>
+
+                <strong>Development</strong>
+
+            </div>
+
+            <div class="footer-item">
+
+                <span>Status</span>
+
+                <strong class="online">
+
+                    ● Online
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </footer>
+
+</div>
+
+<!-- ==========================================================
+LOADING SCREEN
+========================================================== -->
+
+<div id="loadingOverlay" class="loading-overlay">
+
+    <div class="loader-card">
+
+        <div class="loader-spinner"></div>
+
+        <h2>
+
+            Smart Light Ticket Monitoring System
+
+        </h2>
+
+        <p>
+
+            Preparing dashboard...
+
+        </p>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+UPLOAD INPUT
+========================================================== -->
+
+<input
+    type="file"
+    id="csvFileInput"
+    accept=".csv"
+    multiple
+    hidden>
+
+<!-- ==========================================================
+SCRIPTS
+========================================================== -->
+
+<!-- ThingsBoard Sync Modal Removed -->
+
+<script src="js/config.js?v=3"></script>
+
+<script src="js/utils.js?v=3"></script>
+
+<script src="js/charts.js?v=3"></script>
+
+<script src="js/dashboard.js?v=3"></script>
+
+<script src="js/filters.js?v=3"></script>
+
+<script src="js/table.js?v=3"></script>
+
+<script src="js/app.js?v=3"></script>
+
+</body>
+
+</html>
