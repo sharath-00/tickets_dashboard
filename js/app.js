@@ -13,6 +13,10 @@ let charts = {};
 
 let filtersInitialized = false;
 
+let currentPredictiveRiskFilter = "High";
+
+let displayedPredictiveRiskCount = 20;
+
 const csvInput = document.getElementById("csvFileInput");
 
 const uploadBtn = document.getElementById("uploadBtn");
@@ -32,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
     initializeNavigation();
 
     initializeActionButtons();
+
+    initializePredictiveRiskListeners();
 
     loadMainCsvOnStartup();
 
@@ -323,6 +329,8 @@ function initializeDashboard(){
 
     renderNoisyDevices();
 
+    renderPredictiveRisk();
+
 }
 
 /* ==========================================================
@@ -548,7 +556,9 @@ function renderChronicTickets(){
 
     }
 
-    container.innerHTML=chronicAssets.map(asset=>`
+    const displayedChronic = chronicAssets.slice(0, 20);
+
+    container.innerHTML=displayedChronic.map(asset=>`
         <tr>
             <td>${escapeHtml(asset.name)}</td>
             <td>${asset.count}</td>
@@ -630,7 +640,9 @@ function renderNoisyDevices() {
         return;
     }
 
-    container.innerHTML = noisyDevices.map(device => `
+    const displayedNoisy = noisyDevices.slice(0, 15);
+
+    container.innerHTML = displayedNoisy.map(device => `
         <tr>
             <td style="font-weight: 600; color: var(--white);">${escapeHtml(device.name)}</td>
             <td style="color: var(--orange); font-weight: 700;">${device.maxFlapRate} tickets / 24h</td>
@@ -1327,4 +1339,165 @@ function loadMainCsvOnStartup() {
     .catch(err => {
         console.log("Auto-load info:", err.message);
     });
+}
+
+/* ==========================================================
+PREDICTIVE MAINTENANCE RENDERER
+========================================================== */
+
+function renderPredictiveRisk() {
+    const container = document.getElementById("predictiveRiskList");
+    if (!container) return;
+
+    const highBtn = document.querySelector("#predictiveRiskFilters .filter-button[data-risk='High']");
+    const mediumBtn = document.querySelector("#predictiveRiskFilters .filter-button[data-risk='Medium']");
+    const lowBtn = document.querySelector("#predictiveRiskFilters .filter-button[data-risk='Low']");
+    const allBtn = document.querySelector("#predictiveRiskFilters .filter-button[data-risk='All']");
+
+    if (!FILTERED_DATA.length) {
+        if (highBtn) highBtn.textContent = "High Risk (0)";
+        if (mediumBtn) mediumBtn.textContent = "Medium Risk (0)";
+        if (lowBtn) lowBtn.textContent = "Low Risk (0)";
+        if (allBtn) allBtn.textContent = "All Levels (0)";
+        const showMoreBtn = document.getElementById("showMoreRiskBtn");
+        if (showMoreBtn) showMoreBtn.style.display = "none";
+        const showLessBtn = document.getElementById("showLessRiskBtn");
+        if (showLessBtn) showLessBtn.style.display = "none";
+
+        container.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;padding:40px;">
+                    Upload a CSV file to evaluate failure risk.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const allPredictions = runPredictiveMaintenanceModel(FILTERED_DATA);
+
+    let highCount = 0;
+    let mediumCount = 0;
+    let lowCount = 0;
+    allPredictions.forEach(device => {
+        if (device.riskLevel === "High") highCount++;
+        else if (device.riskLevel === "Medium") mediumCount++;
+        else if (device.riskLevel === "Low") lowCount++;
+    });
+    const allCount = allPredictions.length;
+
+    if (highBtn) highBtn.textContent = `High Risk (${highCount})`;
+    if (mediumBtn) mediumBtn.textContent = `Medium Risk (${mediumCount})`;
+    if (lowBtn) lowBtn.textContent = `Low Risk (${lowCount})`;
+    if (allBtn) allBtn.textContent = `All Levels (${allCount})`;
+
+    let predictions = allPredictions;
+    if (currentPredictiveRiskFilter !== "All") {
+        predictions = predictions.filter(device => device.riskLevel === currentPredictiveRiskFilter);
+    }
+
+    const showMoreBtn = document.getElementById("showMoreRiskBtn");
+    const showLessBtn = document.getElementById("showLessRiskBtn");
+
+    if (predictions.length > displayedPredictiveRiskCount) {
+        if (showMoreBtn) showMoreBtn.style.display = "flex";
+    } else {
+        if (showMoreBtn) showMoreBtn.style.display = "none";
+    }
+
+    if (displayedPredictiveRiskCount > 20) {
+        if (showLessBtn) showLessBtn.style.display = "flex";
+    } else {
+        if (showLessBtn) showLessBtn.style.display = "none";
+    }
+
+    const displayedPredictions = predictions.slice(0, displayedPredictiveRiskCount);
+
+    if (!displayedPredictions.length) {
+        container.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center;padding:40px;">
+                    No assets at the ${currentPredictiveRiskFilter} risk level in the filtered set.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    container.innerHTML = displayedPredictions.map(device => {
+        const percent = (device.probability * 100).toFixed(0);
+        
+        let color = "#22C55E";
+        if (device.riskLevel === "High") {
+            color = "#EF4444";
+        } else if (device.riskLevel === "Medium") {
+            color = "#F97316";
+        }
+
+        const progressBarHtml = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="flex: 1; height: 8px; background: #203042; border-radius: 4px; overflow: hidden; min-width: 100px;">
+                    <div style="height: 100%; width: ${percent}%; background: ${color}; border-radius: 4px;"></div>
+                </div>
+                <strong style="color: ${color}; font-weight: 700; width: 45px; text-align: right;">${percent}%</strong>
+            </div>
+        `;
+
+        let badgeBg = "rgba(34, 197, 94, 0.15)";
+        let badgeColor = "#22C55E";
+        if (device.riskLevel === "High") {
+            badgeBg = "rgba(239, 68, 68, 0.15)";
+            badgeColor = "#EF4444";
+        } else if (device.riskLevel === "Medium") {
+            badgeBg = "rgba(249, 115, 22, 0.15)";
+            badgeColor = "#F97316";
+        }
+
+        const badgeHtml = `
+            <span style="padding: 4px 10px; border-radius: 12px; font-weight: 700; font-size: 11px; text-transform: uppercase; background: ${badgeBg}; color: ${badgeColor}; display: inline-block;">
+                ${device.riskLevel}
+            </span>
+        `;
+
+        return `
+            <tr>
+                <td style="font-weight: 600; color: var(--white);">${escapeHtml(device.name)}</td>
+                <td>${progressBarHtml}</td>
+                <td>${badgeHtml}</td>
+                <td style="text-align: center; color: var(--white); font-weight: 500;">${device.recentFailures}</td>
+                <td style="text-align: center; color: var(--muted);">${device.daysSinceLast} days ago</td>
+                <td style="color: var(--orange); font-weight: 600; text-align: center;">${device.flapRate} / 24h</td>
+                <td style="color: var(--primary); font-weight: 500;">${escapeHtml(device.recommendation)}</td>
+            </tr>
+        `;
+    }).join("");
+}
+
+function initializePredictiveRiskListeners() {
+    const buttons = document.querySelectorAll("#predictiveRiskFilters .filter-button");
+    buttons.forEach(button => {
+        button.addEventListener("click", () => {
+            buttons.forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
+            currentPredictiveRiskFilter = button.getAttribute("data-risk");
+            displayedPredictiveRiskCount = 20;
+            renderPredictiveRisk();
+        });
+    });
+
+    const showMoreBtn = document.getElementById("showMoreRiskBtn");
+    if (showMoreBtn) {
+        showMoreBtn.addEventListener("click", () => {
+            displayedPredictiveRiskCount += 15;
+            renderPredictiveRisk();
+        });
+    }
+
+    const showLessBtn = document.getElementById("showLessRiskBtn");
+    if (showLessBtn) {
+        showLessBtn.addEventListener("click", () => {
+            displayedPredictiveRiskCount = 20;
+            renderPredictiveRisk();
+        });
+    }
 }

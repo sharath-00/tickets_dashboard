@@ -149,7 +149,7 @@ HEADER
 
     display:flex;
 
-    justify-content:space-between;
+    justify-content:flex-end;
 
     align-items:center;
 
@@ -169,17 +169,23 @@ HEADER
 
     align-items:center;
 
-    gap:18px;
+    gap:12px;
+
+    padding-bottom:20px;
+
+    border-bottom:1px solid var(--border);
+
+    margin-bottom:20px;
 
 }
 
 .logo-icon{
 
-    width:60px;
+    width:48px;
 
-    height:60px;
+    height:48px;
 
-    border-radius:18px;
+    border-radius:14px;
 
     display:flex;
 
@@ -191,27 +197,29 @@ HEADER
 
     color:#000;
 
-    font-size:28px;
+    font-size:22px;
 
-    box-shadow:0 10px 25px rgba(245,165,36,.35);
+    box-shadow:0 8px 20px rgba(245,165,36,.25);
 
 }
 
 .logo-section h1{
 
-    font-size:28px;
+    font-size:20px;
 
     font-weight:800;
+
+    line-height:1.2;
 
 }
 
 .logo-section p{
 
-    margin-top:5px;
+    margin-top:2px;
 
-    color:var(--text);
+    color:var(--muted);
 
-    font-size:14px;
+    font-size:12px;
 
 }
 
@@ -337,6 +345,38 @@ PULSE
 
 }
 /* ==========================================================
+APP LAYOUT
+========================================================== */
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    padding: 25px 20px;
+}
+
+.main-content {
+    margin-left: 280px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+/* ==========================================================
 DASHBOARD CONTAINER
 ========================================================== */
 
@@ -346,39 +386,39 @@ DASHBOARD CONTAINER
 
     max-width:1900px;
 
-    margin:auto;
+    margin:0 auto;
+
+    width: 100%;
 
 }
 
 /* ==========================================================
-NAVIGATION
+NAVIGATION (SIDEBAR)
 ========================================================== */
 
-.navbar{
+.sidebar .navbar{
 
-    margin:25px 30px 0;
+    margin: 0;
 
-    padding:15px 20px;
+    padding: 0;
 
     display:flex;
 
-    align-items:center;
+    flex-direction: column;
 
-    gap:15px;
+    align-items:stretch;
 
-    background:var(--card);
+    gap:8px;
 
-    border:1px solid var(--border);
+    background:transparent;
 
-    border-radius:18px;
+    border:none;
 
-    box-shadow:var(--shadow);
+    border-radius:0;
 
-}
+    box-shadow:none;
 
-.nav-spacer{
-
-    flex:1;
+    flex: 1;
 
 }
 
@@ -398,11 +438,15 @@ NAVIGATION
 
     align-items:center;
 
-    gap:10px;
+    gap:12px;
 
     font-size:15px;
 
     font-weight:600;
+
+    width: 100%;
+
+    text-align: left;
 
 }
 
@@ -420,6 +464,15 @@ NAVIGATION
 
     color:#000;
 
+}
+
+.sidebar-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
 }
 
 .action-btn{
@@ -444,6 +497,11 @@ NAVIGATION
 
     font-weight:600;
 
+}
+
+.sidebar-actions .action-btn {
+    width: 100%;
+    justify-content: center;
 }
 
 .action-btn:hover{

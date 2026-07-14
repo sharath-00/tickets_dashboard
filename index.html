@@ -43,182 +43,102 @@
 
 <body>
 
-<!-- ==========================================================
-HEADER
-=========================================================== -->
+<div class="app-layout">
 
-<header class="top-header">
-
-    <div class="logo-section">
-
-        <div class="logo-icon">
-
-            <i class="fa-solid fa-lightbulb"></i>
-
+    <!-- ==========================================================
+    SIDEBAR NAVIGATION
+    =========================================================== -->
+    <aside class="sidebar">
+        <div class="logo-section">
+            <div class="logo-icon">
+                <i class="fa-solid fa-lightbulb"></i>
+            </div>
+            <div>
+                <h1>Smart Light</h1>
+                <p>Ticket Monitor</p>
+            </div>
         </div>
 
-        <div>
+        <nav class="navbar">
+            <button class="nav-btn active" data-target="overviewSection">
+                <i class="fa-solid fa-chart-line"></i>
+                Dashboard
+            </button>
+            <button class="nav-btn" data-target="analyticsSection">
+                <i class="fa-solid fa-chart-pie"></i>
+                Analytics
+            </button>
+            <button class="nav-btn" data-target="ticketExplorerSection">
+                <i class="fa-solid fa-table"></i>
+                Tickets
+            </button>
+            <button class="nav-btn" data-target="noisyDevicesSection">
+                <i class="fa-solid fa-bell-slash"></i>
+                Flapping
+            </button>
+            <button class="nav-btn" data-target="predictiveSection">
+                <i class="fa-solid fa-brain"></i>
+                Risk
+            </button>
+        </nav>
 
-            <h1>
-
-                Smart Light Ticket Monitoring System
-
-            </h1>
-
-            <p>
-
-                Real-Time Ticket Analytics Dashboard
-
-            </p>
-
+        <div class="sidebar-actions">
+            <button class="action-btn" id="uploadBtn">
+                <i class="fa-solid fa-upload"></i>
+                Upload CSV
+            </button>
+            <button class="action-btn" id="exportBtn">
+                <i class="fa-solid fa-download"></i>
+                Export
+            </button>
+            <button class="action-btn" id="refreshBtn">
+                <i class="fa-solid fa-arrows-rotate"></i>
+                Refresh
+            </button>
+            <button class="action-btn" id="clearBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
+                <i class="fa-solid fa-trash-can"></i>
+                Clear Data
+            </button>
         </div>
-
-    </div>
-
-    <div class="header-right">
-
-        <div class="live-box">
-
-            <span class="live-dot"></span>
-
-            LIVE
-
-        </div>
-
-        <div class="header-info">
-
-            <span>CSV</span>
-
-            <strong id="csvName">
-
-                Waiting...
-
-            </strong>
-
-        </div>
-
-        <div class="header-info">
-
-            <span>Records</span>
-
-            <strong id="recordCount">
-
-                0
-
-            </strong>
-
-        </div>
-
-        <div class="header-info">
-
-            <span>Updated</span>
-
-            <strong id="lastRefresh">
-
-                --
-
-            </strong>
-
-        </div>
-
-        <div class="header-info">
-
-            <span>Time</span>
-
-            <strong id="clock">
-
-                --:--
-
-            </strong>
-
-        </div>
-
-        <button class="icon-btn">
-
-            <i class="fa-regular fa-bell"></i>
-
-        </button>
-
-        <button class="icon-btn">
-
-            <i class="fa-regular fa-circle-user"></i>
-
-        </button>
-
-    </div>
-
-</header>
-
-<!-- ==========================================================
-NAVIGATION
-=========================================================== -->
-
-<nav class="navbar">
-
-    <button class="nav-btn active" data-target="overviewSection">
-
-        <i class="fa-solid fa-chart-line"></i>
-
-        Dashboard
-
-    </button>
-
-    <button class="nav-btn" data-target="analyticsSection">
-
-        <i class="fa-solid fa-chart-pie"></i>
-
-        Analytics
-
-    </button>
-
-    <button class="nav-btn" data-target="ticketExplorerSection">
-
-        <i class="fa-solid fa-table"></i>
-
-        Tickets
-
-    <button class="nav-btn" data-target="noisyDevicesSection">
-
-        <i class="fa-solid fa-bell-slash"></i>
-
-        Flapping
-
-    </button>
-
-    <div class="nav-spacer"></div>
-
-    <button class="action-btn" id="clearBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626); color: white;">
-        <i class="fa-solid fa-trash-can"></i>
-        Clear Data
-    </button>
-
-    <button class="action-btn" id="uploadBtn">
-
-    <i class="fa-solid fa-upload"></i>
-
-    Upload CSV
-
-</button>
-
-    <button class="action-btn" id="exportBtn">
-
-        <i class="fa-solid fa-download"></i>
-
-        Export
-
-    </button>
-
-    <button class="action-btn" id="refreshBtn">
-
-        <i class="fa-solid fa-arrows-rotate"></i>
-
-        Refresh
-
-    </button>
-
-</nav>
-
-<div class="dashboard-container">
+    </aside>
+
+    <!-- ==========================================================
+    MAIN CONTENT AREA
+    =========================================================== -->
+    <div class="main-content">
+
+        <!-- ==========================================================
+        HEADER
+        =========================================================== -->
+        <header class="top-header">
+            <div class="header-right">
+
+                <div class="header-info">
+                    <span>CSV</span>
+                    <strong id="csvName">Waiting...</strong>
+                </div>
+                <div class="header-info">
+                    <span>Records</span>
+                    <strong id="recordCount">0</strong>
+                </div>
+                <div class="header-info">
+                    <span>Updated</span>
+                    <strong id="lastRefresh">--</strong>
+                </div>
+                <div class="header-info">
+                    <span>Time</span>
+                    <strong id="clock">--:--</strong>
+                </div>
+                <button class="icon-btn">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+                <button class="icon-btn">
+                    <i class="fa-regular fa-circle-user"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard-container">
         <!-- ==========================================================
     FILTER TOOLBAR
     =========================================================== -->
@@ -377,13 +297,7 @@ NAVIGATION
 
                 </div>
 
-                <span class="trend positive">
 
-                    <i class="fa-solid fa-arrow-trend-up"></i>
-
-                    +0%
-
-                </span>
 
             </div>
 
@@ -417,13 +331,7 @@ NAVIGATION
 
                 </div>
 
-                <span class="trend positive">
 
-                    <i class="fa-solid fa-arrow-trend-up"></i>
-
-                    +0%
-
-                </span>
 
             </div>
 
@@ -457,13 +365,7 @@ NAVIGATION
 
                 </div>
 
-                <span class="trend warning">
 
-                    <i class="fa-solid fa-minus"></i>
-
-                    0%
-
-                </span>
 
             </div>
 
@@ -497,13 +399,7 @@ NAVIGATION
 
                 </div>
 
-                <span class="trend negative">
 
-                    <i class="fa-solid fa-arrow-trend-down"></i>
-
-                    0%
-
-                </span>
 
             </div>
 
@@ -1295,6 +1191,100 @@ NAVIGATION
 
     </section>
 
+    <!-- ==========================================================
+    PREDICTIVE MAINTENANCE (FAILURE RISK)
+    =========================================================== -->
+
+    <section class="section-title" id="predictiveSection">
+
+        <div>
+
+            <h2>Predictive Maintenance (ML Risk Score)</h2>
+
+            <p>
+
+                Machine Learning model (Random Forest Classifier) predicting panel failure probability in the next 14 days based on historical telemetry patterns.
+
+            </p>
+
+            <div id="predictiveRiskFilters" class="button-filter-group" style="margin-top: 15px; display: flex; gap: 10px;">
+
+                <button class="filter-button active" data-risk="High">High Risk</button>
+
+                <button class="filter-button" data-risk="Medium">Medium Risk</button>
+
+                <button class="filter-button" data-risk="Low">Low Risk</button>
+
+                <button class="filter-button" data-risk="All">All Levels</button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="table-section">
+
+        <div class="dashboard-card large-card table-card">
+
+            <div class="table-wrapper">
+
+                <table id="predictiveRiskTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Asset / Panel</th>
+
+                            <th>Failure Probability (Next 14d)</th>
+
+                            <th>Risk Level</th>
+
+                            <th>Recent Failures (7d)</th>
+
+                            <th>Days Since Last Fault</th>
+
+                            <th>Telemetry Flap Rate (24h)</th>
+
+                            <th>Recommendation</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="predictiveRiskList">
+
+                        <tr>
+
+                            <td colspan="7" style="text-align:center;padding:40px;">
+
+                                Waiting for CSV Upload...
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Arrow down / Show More and Show Less buttons -->
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px; padding-bottom: 20px;">
+                <button class="action-btn" id="showMoreRiskBtn" style="display: none; align-items: center; gap: 8px;">
+                    Show More <i class="fa-solid fa-chevron-down"></i>
+                </button>
+                <button class="action-btn" id="showLessRiskBtn" style="display: none; align-items: center; gap: 8px; background: #203042;">
+                    Show Less <i class="fa-solid fa-chevron-up"></i>
+                </button>
+            </div>
+
+        </div>
+
+    </section>
+
 
 
     <!-- ==========================================================
@@ -1573,7 +1563,9 @@ NAVIGATION
 
     </footer>
 
-</div>
+</div> <!-- dashboard-container -->
+</div> <!-- main-content -->
+</div> <!-- app-layout -->
 
 <!-- ==========================================================
 LOADING SCREEN
@@ -1629,6 +1621,8 @@ SCRIPTS
 <script src="js/filters.js?v=3"></script>
 
 <script src="js/table.js?v=3"></script>
+
+<script src="js/ml.js?v=3"></script>
 
 <script src="js/app.js?v=3"></script>
 

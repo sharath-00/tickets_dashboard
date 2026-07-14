@@ -478,6 +478,8 @@ function applyFilters(){
 
     renderNoisyDevices();
 
+    renderPredictiveRisk();
+
 }
 /* ==========================================================
 MATCH DROPDOWN

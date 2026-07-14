@@ -85,3 +85,60 @@
     }
 
 }
+
+/* ===================================
+   SIDEBAR LAYOUT RESPONSIVENESS
+   =================================== */
+
+@media(max-width:1024px){
+
+    .app-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 20px;
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar .logo-section {
+        flex-direction: row;
+        border-bottom: none;
+        margin-bottom: 15px;
+        padding-bottom: 0;
+    }
+
+    .sidebar .navbar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        gap: 10px;
+    }
+
+    .sidebar .navbar .nav-btn {
+        width: auto;
+        padding: 10px 15px;
+    }
+
+    .sidebar-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        padding-top: 15px;
+        gap: 10px;
+    }
+
+    .sidebar-actions .action-btn {
+        width: auto;
+        justify-content: center;
+    }
+
+}
