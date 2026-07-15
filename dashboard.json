@@ -1,0 +1,227 @@
+{
+  "title": "Tickets v2",
+  "image": null,
+  "mobileHide": false,
+  "mobileOrder": null,
+  "configuration": {
+    "description": "",
+    "widgets": {
+      "c0abc8ae-a52a-8c05-d60c-13d559db4663": {
+        "typeFullFqn": "system.cards.markdown_card",
+        "type": "latest",
+        "sizeX": 5,
+        "sizeY": 3.5,
+        "config": {
+          "datasources": [
+            {
+              "type": "entity",
+              "name": "",
+              "entityAliasId": "cb28b39f-6b65-f855-46f4-4d7a3774b17d",
+              "dataKeys": [
+                {
+                  "name": "name",
+                  "type": "entityField",
+                  "label": "brightCityRegion",
+                  "color": "#2196f3",
+                  "settings": {},
+                  "_hash": 0.5423154355655191,
+                  "aggregationType": null,
+                  "units": null,
+                  "decimals": null,
+                  "funcBody": null,
+                  "usePostProcessing": null,
+                  "postFuncBody": null
+                }
+              ],
+              "alarmFilterConfig": {
+                "statusList": [
+                  "ACTIVE"
+                ]
+              }
+            }
+          ],
+          "timewindow": {
+            "displayValue": "",
+            "selectedTab": 0,
+            "realtime": {
+              "realtimeType": 1,
+              "interval": 1000,
+              "timewindowMs": 60000,
+              "quickInterval": "CURRENT_DAY",
+              "hideInterval": false,
+              "hideLastInterval": false,
+              "hideQuickInterval": false
+            },
+            "history": {
+              "historyType": 0,
+              "interval": 1000,
+              "timewindowMs": 60000,
+              "fixedTimewindow": {
+                "startTimeMs": 1776257653430,
+                "endTimeMs": 1776344053430
+              },
+              "quickInterval": "CURRENT_DAY",
+              "hideInterval": false,
+              "hideLastInterval": false,
+              "hideFixedInterval": false,
+              "hideQuickInterval": false
+            },
+            "aggregation": {
+              "type": "AVG",
+              "limit": 25000
+            }
+          },
+          "showTitle": false,
+          "backgroundColor": "#fff",
+          "color": "rgba(0, 0, 0, 0.87)",
+          "padding": "0px",
+          "settings": {
+            "useMarkdownTextFunction": true,
+            "markdownTextPattern": "### Markdown/HTML card\n - **Current entity**: ${entityName}.\n - **Current value**: ${Temperature}.",
+            "markdownTextFunction": "let env = \"schnelliot\";\nlet email = ctx.currentUser.sub;\nlet name = ctx.currentUser.firstName;\nlet userId = ctx.currentUser.userId;\nlet token = localStorage.getItem(\"jwt_token\");\nlet cacheBuster = new Date().getTime();\n\nwindow.tbWidgetContext = ctx;\n\nlet tbFilters = {};\ntry {\n    if (ctx.aliasController) {\n        let filters = ctx.aliasController.getFilters();\n        for (let filterId in filters) {\n            if (filters.hasOwnProperty(filterId)) {\n                let f = filters[filterId];\n                let val = \"\";\n                if (f.keyValues && f.keyValues.length > 0) {\n                    val = f.keyValues[0];\n                } else if (f.valueList && f.valueList.length > 0) {\n                    val = f.valueList[0];\n                } else if (f.value !== undefined) {\n                    val = f.value;\n                }\n                if (val !== undefined && val !== null) {\n                    tbFilters[f.filter] = val;\n                }\n            }\n        } \n    }\n} catch (e) {\n    console.error(\"Error reading dashboard filters:\", e);\n}\n\nlet filterParams = encodeURIComponent(JSON.stringify(tbFilters));\n\nreturn `<div class='card'>\\n<iframe \\n  id=\"ticketsIframe\"\\n  width=\"100%\" \\n  height=\"100%\" \\n  src=\"https://schnelliot-380113.web.app/?env=${env}&token=${token}&userId=${userId}&userEmail=${email}&user=${name}&cb=${cacheBuster}&tbFilters=${filterParams}\" \\n  frameborder=\"0\" \\n  style=\"border:0\"\\n  allow=\"clipboard-read; clipboard-write\">\\n</iframe>\\n<script>\\n(function() {\\n    let iframe = document.getElementById(\"ticketsIframe\");\\n    if (!iframe) return;\\n    \\n    function sendFilters() {\\n        try {\\n            let context = window.parentContext || window.tbWidgetContext;\\n            if (context && context.aliasController) {\\n                let filters = context.aliasController.getFilters();\\n                let filterMap = {};\\n                for (let filterId in filters) {\n                    if (filters.hasOwnProperty(filterId)) {\n                        let f = filters[filterId];\\n                        let val = \"\";\\n                        if (f.keyValues && f.keyValues.length > 0) {\n                            val = f.keyValues[0];\\n                        } else if (f.valueList && f.valueList.length > 0) {\n                            val = f.valueList[0];\\n                        } else if (f.value !== undefined) {\n                            val = f.value;\\n                        }\\n                        if (val !== undefined && val !== null) {\n                            filterMap[f.filter] = val;\n                        }\\n                    }\\n                }\\n                iframe.contentWindow.postMessage({\\n                    type: \"tbFilters\",\\n                    filters: filterMap\\n                }, \"*\");\\n            }\\n        } catch (e) {}\\n    }\\n    \\n    setInterval(sendFilters, 2000);\\n})();\\n<\\/script>\\n    </div>`;",
+            "applyDefaultMarkdownStyle": false,
+            "markdownCss": ".card {\n    font-weight: bold;\n    font-size: 32px;\n    color: #999;\n    width: 100%;\n    height: 100%;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    overflow-y: hidden;\n}\n\n"
+          },
+          "title": "Markdown/HTML Card",
+          "showTitleIcon": false,
+          "iconColor": "rgba(0, 0, 0, 0.87)",
+          "iconSize": "24px",
+          "titleTooltip": "",
+          "dropShadow": true,
+          "enableFullscreen": false,
+          "widgetStyle": {},
+          "titleStyle": {
+            "fontSize": "16px",
+            "fontWeight": 400
+          },
+          "showLegend": false,
+          "useDashboardTimewindow": true,
+          "displayTimewindow": true,
+          "enableDataExport": false,
+          "widgetCss": "",
+          "pageSize": 1024,
+          "noDataDisplayMessage": ""
+        },
+        "row": 0,
+        "col": 0,
+        "id": "c0abc8ae-a52a-8c05-d60c-13d559db4663"
+      }
+    },
+    "states": {
+      "default": {
+        "name": "Ticket [Dev]",
+        "root": true,
+        "layouts": {
+          "main": {
+            "widgets": {
+              "c0abc8ae-a52a-8c05-d60c-13d559db4663": {
+                "sizeX": 27,
+                "sizeY": 14,
+                "row": 0,
+                "col": 0,
+                "resizable": false
+              }
+            },
+            "gridSettings": {
+              "layoutType": "default",
+              "backgroundColor": "#eeeeee",
+              "columns": 24,
+              "margin": 0,
+              "outerMargin": false,
+              "backgroundSizeMode": "100%",
+              "minColumns": 24,
+              "viewFormat": "grid",
+              "autoFillHeight": true,
+              "rowHeight": 70,
+              "backgroundImageUrl": null,
+              "mobileAutoFillHeight": false,
+              "mobileRowHeight": 70
+            }
+          }
+        }
+      }
+    },
+    "entityAliases": {
+      "cb28b39f-6b65-f855-46f4-4d7a3774b17d": {
+        "id": "cb28b39f-6b65-f855-46f4-4d7a3774b17d",
+        "alias": "Selected Entity",
+        "filter": {
+          "type": "stateEntity",
+          "resolveMultiple": false,
+          "stateEntityParamName": "selectedEntity",
+          "defaultStateEntity": null
+        }
+      }
+    },
+    "filters": {},
+    "timewindow": {
+      "displayValue": "",
+      "hideAggregation": false,
+      "hideAggInterval": false,
+      "hideTimezone": false,
+      "selectedTab": 0,
+      "realtime": {
+        "realtimeType": 0,
+        "interval": 1000,
+        "timewindowMs": 60000,
+        "quickInterval": "CURRENT_DAY",
+        "hideInterval": false,
+        "hideLastInterval": false,
+        "hideQuickInterval": false
+      },
+      "history": {
+        "historyType": 0,
+        "interval": 1000,
+        "timewindowMs": 60000,
+        "fixedTimewindow": {
+          "startTimeMs": 1776257600946,
+          "endTimeMs": 1776344000946
+        },
+        "quickInterval": "CURRENT_DAY",
+        "hideInterval": false,
+        "hideLastInterval": false,
+        "hideFixedInterval": false,
+        "hideQuickInterval": false
+      },
+      "aggregation": {
+        "type": "AVG",
+        "limit": 25000
+      }
+    },
+    "settings": {
+      "stateControllerId": "entity",
+      "showTitle": false,
+      "showDashboardsSelect": false,
+      "showEntitiesSelect": false,
+      "showDashboardTimewindow": false,
+      "showDashboardExport": false,
+      "toolbarAlwaysOpen": false,
+      "titleColor": "rgba(0,0,0,0.870588)",
+      "showDashboardLogo": false,
+      "dashboardLogoUrl": null,
+      "hideToolbar": true,
+      "showFilters": false,
+      "showUpdateDashboardImage": false,
+      "dashboardCss": ""
+    }
+  },
+  "name": "Tickets v2",
+  "resources": null,
+  "id": {
+    "entityType": "DASHBOARD",
+    "id": "42396730-3993-11f1-9e5f-85a6074555d7"
+  },
+  "createdTime": 1776344005923,
+  "tenantId": {
+    "entityType": "TENANT",
+    "id": "5bdda460-01fc-11ea-9146-7b8bb9a7e2b9"
+  },
+  "customerId": null,
+  "assignedCustomers": null,
+  "externalId": null,
+  "version": 25,
+  "ownerId": {
+    "entityType": "TENANT",
+    "id": "5bdda460-01fc-11ea-9146-7b8bb9a7e2b9"
+  }
+}

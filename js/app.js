@@ -162,7 +162,26 @@ function resetFilters(){
 
     document.getElementById("priorityFilter").value = "All";
 
+    document.getElementById("customerFilter").value = "All";
+
+    document.getElementById("deviceTypeFilter").value = "All";
+
+    document.getElementById("problemTypeFilter").value = "All";
+
+    document.getElementById("assigneeFilter").value = "All";
+
+    document.getElementById("complaineeFilter").value = "All";
+
+    document.getElementById("startDateFilter").value = "";
+
+    document.getElementById("endDateFilter").value = "";
+
     document.getElementById("ticketSearch").value = "";
+
+    const tableSearch = document.getElementById("ticketTableSearch");
+    if(tableSearch){
+        tableSearch.value = "";
+    }
 
     // Reset status button filters
     selectedStatuses.clear();
@@ -1234,6 +1253,8 @@ function standardizeTicket(row) {
     const locationKeys = ["Location", "location", "Address", "address"];
     const commentsKeys = ["Latest Comments", "Comments", "LatestComments", "comments", "Remark", "Remarks", "remark", "remarks", "Comment", "comment"];
     const phoneKeys = ["Complainee Phone Number", "Complainee Phone", "Phone Number", "Phone", "Mobile", "mobile", "Mobile Number", "mobile_number", "Complainee Mobile"];
+    const customerKeys = ["Customer", "customer", "customer_name", "Customer Name", "CustomerName"];
+    const customerIdKeys = ["Customer ID", "customer_id", "CustomerID", "customerId"];
 
     return {
         "Ticket No": getTicketValue(row, ticketKeys) || "",
@@ -1247,6 +1268,8 @@ function standardizeTicket(row) {
         "Status": getTicketValue(row, statusKeys) || "Open",
         "Priority": getTicketValue(row, priorityKeys) || "Minor",
         "Assignee": getTicketValue(row, assigneeKeys) || "Unassigned",
+        "Customer": getTicketValue(row, customerKeys) || "",
+        "Customer ID": getTicketValue(row, customerIdKeys) || "",
         "Opened Time": getTicketValue(row, openedTimeKeys) || "",
         "Closed Time": getTicketValue(row, closedTimeKeys) || "",
         "Duration (Days)": parseFloat(getTicketValue(row, durationKeys)) || 0.0,

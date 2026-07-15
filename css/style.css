@@ -594,7 +594,8 @@ FILTER TOOLBAR
 
 }
 
-.filter-group select{
+.filter-group select,
+.filter-group input[type="date"]{
 
     width:180px;
 
@@ -610,9 +611,12 @@ FILTER TOOLBAR
 
     padding:0 15px;
 
+    color-scheme: dark;
+
 }
 
-.filter-group select:focus{
+.filter-group select:focus,
+.filter-group input[type="date"]:focus{
 
     border-color:var(--primary);
 

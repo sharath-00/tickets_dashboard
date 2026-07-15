@@ -1,3 +1,0 @@
-Ticket ID,Project,Zone,Ward,Complainer,Asset Type,Asset ID,Problem,State,Severity,Assignee,Created Time,Closed Time,Duration,Location,Comments,Mobile
-T2001,ERO,ERO-Zone,ERO-Ward-1,Alice,ILM,DeviceX,Input Power unavailable,Open,Critical,Bob,2026-07-10 12:00:00,,0.0,Chennai,First ticket,1111111111
-T2002,ERO,ERO-Zone,ERO-Ward-1,Alice,ILM,DeviceY,Communication failure,Closed,Minor,Bob,2026-07-09 10:00:00,2026-07-09 14:00:00,0.17,Chennai,Resolved,1111111111

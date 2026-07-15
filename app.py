@@ -10,8 +10,8 @@ CSV_PATH = "main.csv"
 CSV_COLUMNS = [
     "Ticket No", "Region", "Zone", "Ward", "Complainee", "Device/Asset Type",
     "Device/Asset Name", "Problem Type", "Status", "Priority", "Assignee",
-    "Opened Time", "Closed Time", "Duration (Days)", "Location", "Latest Comments",
-    "Complainee Phone Number"
+    "Customer", "Customer ID", "Opened Time", "Closed Time", "Duration (Days)",
+    "Location", "Latest Comments", "Complainee Phone Number"
 ]
 
 

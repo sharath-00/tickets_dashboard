@@ -11,7 +11,21 @@ const filterIds = {
 
     ward: "wardFilter",
 
-    priority: "priorityFilter"
+    priority: "priorityFilter",
+
+    customer: "customerFilter",
+
+    deviceType: "deviceTypeFilter",
+
+    problemType: "problemTypeFilter",
+
+    assignee: "assigneeFilter",
+
+    complainee: "complaineeFilter",
+
+    startDate: "startDateFilter",
+
+    endDate: "endDateFilter"
 
 };
 
@@ -26,15 +40,9 @@ LOAD FILTERS
 
 function loadFilters(){
 
-    loadDropdown(
-
-        filterIds.region,
-
-        findColumn(["Region","region"]),
-
-        RAW_DATA
-
-    );
+    const customerMap = (window.APP_CONFIG && window.APP_CONFIG.customerRegionsMap) || {};
+    const customers = Object.keys(customerMap);
+    loadCustomDropdown(filterIds.customer, customers);
 
     updateCascadingDropdowns();
 
@@ -48,6 +56,46 @@ function loadFilters(){
 
     );
 
+    loadDropdown(
+
+        filterIds.deviceType,
+
+        findColumn(["Device/Asset Type","Device Type","device_type","entity_type"]),
+
+        RAW_DATA
+
+    );
+
+    loadDropdown(
+
+        filterIds.problemType,
+
+        findColumn(["Problem Type","Problem","problem_type"]),
+
+        RAW_DATA
+
+    );
+
+    loadDropdown(
+
+        filterIds.assignee,
+
+        findColumn(["Assignee","assignee"]),
+
+        RAW_DATA
+
+    );
+
+    loadDropdown(
+
+        filterIds.complainee,
+
+        findColumn(["Complainee","complainee"]),
+
+        RAW_DATA
+
+    );
+
     loadStatusButtons(findColumn(["Status","status"]));
 
     if(!filtersInitialized){
@@ -55,6 +103,9 @@ function loadFilters(){
         initializeFilterEvents();
 
         filtersInitialized = true;
+
+        // Apply URL filters on initial load after events are registered
+        applyUrlFilters();
 
     }
 
@@ -66,28 +117,62 @@ LOAD CASCADING DROPDOWNS
 
 function updateCascadingDropdowns(){
 
+    const customerColumn = findColumn(["Customer","customer","customer_name"]);
     const regionColumn = findColumn(["Region","region"]);
     const zoneColumn = findColumn(["Zone","zone"]);
     const wardColumn = findColumn(["Ward","ward"]);
 
+    const customerSelect = document.getElementById(filterIds.customer);
+    const selectedCustomer = customerSelect ? customerSelect.value : "All";
+
+    const customerMap = (window.APP_CONFIG && window.APP_CONFIG.customerRegionsMap) || {};
+
+    // 1. Filter Region dropdown options based on selected Customer from static map
+    let regions = [];
+    if(selectedCustomer === "All"){
+        // If All Customers selected, show all unique regions from our static map
+        const allRegions = new Set();
+        Object.values(customerMap).forEach(regs => {
+            regs.forEach(r => allRegions.add(r));
+        });
+        regions = Array.from(allRegions);
+    } else {
+        // Otherwise show only regions belonging to this customer
+        regions = customerMap[selectedCustomer] || [];
+    }
+    loadCustomDropdown(filterIds.region, regions);
+
+    // Get current region selection (might have reset to "All" if invalid after customer reload)
     const regionSelect = document.getElementById(filterIds.region);
     const selectedRegion = regionSelect ? regionSelect.value : "All";
 
-    // 1. Filter records for Zone dropdown based on selected Region
+    // 2. Filter records for Zone dropdown based on selected Customer AND Region
     let zoneRecords = RAW_DATA;
+    if(selectedCustomer !== "All" && customerColumn){
+        zoneRecords = zoneRecords.filter(r=>{
+            const val = r[customerColumn];
+            return val && String(val).trim() === String(selectedCustomer).trim();
+        });
+    }
     if(selectedRegion !== "All" && regionColumn){
-        zoneRecords = RAW_DATA.filter(r=>r[regionColumn]===selectedRegion);
+        zoneRecords = zoneRecords.filter(r=>{
+            const val = r[regionColumn];
+            return val && String(val).trim() === String(selectedRegion).trim();
+        });
     }
     loadDropdown(filterIds.zone, zoneColumn, zoneRecords);
 
-    // Get current zone selection after reloading (which might have reset to "All" if invalid)
+    // Get current zone selection (might have reset to "All" if invalid after region reload)
     const zoneSelect = document.getElementById(filterIds.zone);
     const selectedZone = zoneSelect ? zoneSelect.value : "All";
 
-    // 2. Filter records for Ward dropdown based on selected Region AND Zone
+    // 3. Filter records for Ward dropdown based on selected Customer AND Region AND Zone
     let wardRecords = zoneRecords;
     if(selectedZone !== "All" && zoneColumn){
-        wardRecords = zoneRecords.filter(r=>r[zoneColumn]===selectedZone);
+        wardRecords = zoneRecords.filter(r=>{
+            const val = r[zoneColumn];
+            return val && String(val).trim() === String(selectedZone).trim();
+        });
     }
     loadDropdown(filterIds.ward, wardColumn, wardRecords);
 
@@ -138,6 +223,40 @@ function loadDropdown(
     });
 
     if (values.includes(currentValue)) {
+        select.value = currentValue;
+    } else {
+        select.value = "All";
+    }
+
+}
+
+/* ==========================================================
+LOAD CUSTOM LIST DROPDOWN
+========================================================== */
+
+function loadCustomDropdown(id, optionsList){
+
+    const select = document.getElementById(id);
+
+    if(!select || !optionsList) return;
+
+    const currentValue = select.value || "All";
+
+    select.innerHTML = "<option value=\"All\">All</option>";
+
+    optionsList.sort().forEach(value => {
+
+        const option = document.createElement("option");
+
+        option.value = value;
+
+        option.textContent = value;
+
+        select.appendChild(option);
+
+    });
+
+    if (optionsList.includes(currentValue)) {
         select.value = currentValue;
     } else {
         select.value = "All";
@@ -352,7 +471,7 @@ FILTER EVENTS
 
 function initializeFilterEvents(){
 
-    // Initialize dropdown filters
+    // Initialize dropdown and date filters
     Object.values(filterIds).forEach(id=>{
 
         const element = document.getElementById(id);
@@ -360,6 +479,10 @@ function initializeFilterEvents(){
         if(element){
 
             element.addEventListener("change", applyFilters);
+
+            if(element.tagName === "INPUT" && element.type === "date"){
+                element.addEventListener("input", applyFilters);
+            }
 
         }
 
@@ -380,13 +503,22 @@ function initializeFilterEvents(){
 
     });
 
-    // Initialize search box
-    const searchBox = document.getElementById("ticketSearch");
+    // Initialize and synchronize search boxes
+    const searchBox1 = document.getElementById("ticketSearch");
+    const searchBox2 = document.getElementById("ticketTableSearch");
 
-    if(searchBox){
+    if(searchBox1){
+        searchBox1.addEventListener("keyup", (e) => {
+            if(searchBox2) searchBox2.value = e.target.value;
+            applyFilters();
+        });
+    }
 
-        searchBox.addEventListener("keyup", applyFilters);
-
+    if(searchBox2){
+        searchBox2.addEventListener("keyup", (e) => {
+            if(searchBox1) searchBox1.value = e.target.value;
+            applyFilters();
+        });
     }
 
 }
@@ -450,11 +582,75 @@ function applyFilters(){
 
             &&
 
+            matches(
+
+                ticket,
+
+                findColumn(["Customer","customer","customer_name"]),
+
+                filterIds.customer
+
+            )
+
+            &&
+
+            matches(
+
+                ticket,
+
+                findColumn(["Device/Asset Type","Device Type","device_type","entity_type"]),
+
+                filterIds.deviceType
+
+            )
+
+            &&
+
+            matches(
+
+                ticket,
+
+                findColumn(["Problem Type","Problem","problem_type"]),
+
+                filterIds.problemType
+
+            )
+
+            &&
+
+            matches(
+
+                ticket,
+
+                findColumn(["Assignee","assignee"]),
+
+                filterIds.assignee
+
+            )
+
+            &&
+
+            matches(
+
+                ticket,
+
+                findColumn(["Complainee","complainee"]),
+
+                filterIds.complainee
+
+            )
+
+            &&
+
             matchesMultiSelectStatus(ticket)
 
             &&
 
             matchesMultiSelectTicketState(ticket)
+
+            &&
+
+            matchesDateRange(ticket)
 
             &&
 
@@ -513,7 +709,7 @@ function matches(
 
     }
 
-    return ticket[column]===selected;
+    return String(ticket[column]).trim() === String(selected).trim();
 
 }
 
@@ -596,20 +792,69 @@ function matchesMultiSelectTicketState(ticket){
 }
 
 /* ==========================================================
+MATCH DATE RANGE
+========================================================== */
+
+function matchesDateRange(ticket){
+
+    const startEl = document.getElementById(filterIds.startDate);
+
+    const endEl = document.getElementById(filterIds.endDate);
+
+    if(!startEl || !endEl) return true;
+
+    const startVal = startEl.value;
+
+    const endVal = endEl.value;
+
+    if(!startVal && !endVal) return true;
+
+    const openedTimeCol = findColumn(["Opened Time", "Opened", "opened_time", "ticket_opened_on"]);
+
+    if(!openedTimeCol) return true;
+
+    const openedTimeStr = ticket[openedTimeCol];
+
+    if(!openedTimeStr) return false;
+
+    let dateStr = openedTimeStr.trim();
+    if(dateStr.includes(" ") && !dateStr.includes("T")){
+        dateStr = dateStr.replace(" ", "T");
+    }
+
+    const ticketDate = new Date(dateStr);
+
+    if(isNaN(ticketDate.getTime())) return true;
+
+    if(startVal){
+
+        const startDate = new Date(startVal + "T00:00:00");
+
+        if(ticketDate < startDate) return false;
+
+    }
+
+    if(endVal){
+
+        const endDate = new Date(endVal + "T23:59:59");
+
+        if(ticketDate > endDate) return false;
+
+    }
+
+    return true;
+
+}
+
+/* ==========================================================
 SEARCH
 ========================================================== */
 
 function searchMatch(ticket){
 
-    const keyword=document
-
-        .getElementById("ticketSearch")
-
-        .value
-
-        .toLowerCase()
-
-        .trim();
+    const keyword1 = document.getElementById("ticketSearch")?.value || "";
+    const keyword2 = document.getElementById("ticketTableSearch")?.value || "";
+    const keyword = (keyword1 || keyword2).toLowerCase().trim();
 
     if(keyword===""){
 
@@ -659,3 +904,102 @@ function findColumn(possibleNames){
     return null;
 
 }
+
+/* ==========================================================
+APPLY URL FILTERS (ON STARTUP)
+========================================================== */
+
+function applyUrlFilters(){
+
+    const urlParams = new URLSearchParams(window.location.search);
+
+    let hasChanges = false;
+
+    // 1. Direct query parameters (e.g. ?Region=Arani)
+    urlParams.forEach((value, key) => {
+        const id = key.toLowerCase() + "Filter";
+        const element = document.getElementById(id) || document.getElementById(key + "Filter");
+        if(element){
+            if(element.tagName === "SELECT"){
+                const options = Array.from(element.options).map(o => o.value);
+                if(options.includes(value)){
+                    element.value = value;
+                    hasChanges = true;
+                }
+            } else if(element.tagName === "INPUT" && element.type === "date"){
+                element.value = value;
+                hasChanges = true;
+            }
+        }
+    });
+
+    // 2. ThingsBoard-specific filters object (e.g. ?tbFilters={"Region":"Arani"})
+    const tbFiltersRaw = urlParams.get("tbFilters");
+    if(tbFiltersRaw){
+        try {
+            const tbFilters = JSON.parse(decodeURIComponent(tbFiltersRaw));
+            if(applyTbFilters(tbFilters)){
+                hasChanges = true;
+            }
+        } catch(e) {
+            console.error("Error parsing tbFilters URL parameter:", e);
+        }
+    }
+
+    if(hasChanges){
+        applyFilters();
+    }
+
+}
+
+/* ==========================================================
+APPLY THINGSBOARD POSTMESSAGE FILTERS
+========================================================== */
+
+function applyTbFilters(filters){
+
+    if(!filters || typeof filters !== "object") return false;
+
+    let hasChanges = false;
+
+    Object.entries(filters).forEach(([key, val]) => {
+        let normalizedKey = key.toLowerCase().trim();
+        
+        // Map 'customername' or 'customer' to 'customer'
+        if(normalizedKey === "customername"){
+            normalizedKey = "customer";
+        }
+        
+        const filterId = filterIds[normalizedKey] || normalizedKey + "Filter";
+        const element = document.getElementById(filterId) || document.getElementById(key + "Filter");
+
+        if(element){
+            const newVal = val || "All";
+            if(element.value !== newVal){
+                if(element.tagName === "SELECT"){
+                    const options = Array.from(element.options).map(o => o.value);
+                    if(options.includes(newVal)){
+                        element.value = newVal;
+                        hasChanges = true;
+                    }
+                } else {
+                    element.value = newVal;
+                    hasChanges = true;
+                }
+            }
+        }
+    });
+
+    return hasChanges;
+
+}
+
+// Listen to postMessage event from ThingsBoard
+window.addEventListener("message", (event) => {
+    const data = event.data;
+    if(data && data.type === "tbFilters"){
+        if(applyTbFilters(data.filters)){
+            applyFilters();
+        }
+    }
+});

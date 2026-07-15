@@ -1,3 +1,0 @@
-Ticket No,Region,Zone,Ward,Complainee,Device/Asset Type,Device/Asset Name,Problem Type,Status,Priority,Assignee,Opened Time,Closed Time,Duration (Days),Location,Latest Comments,Complainee Phone Number
-T1001,AVADI,AVADI-Zone,AVADI-Ward,John Doe,ILM,DeviceA,Power Failure,Open,Critical,Unassigned,2026-07-10 10:00:00,,0.0,Avadi Street,Needs immediate attention,1234567890
-T1002,AVADI,AVADI-Zone,AVADI-Ward,Jane Smith,SLC Panel,PanelB,Lamp Fault,Closed,Major,AssignedUser,2026-07-09 11:00:00,2026-07-10 11:00:00,1.0,Avadi Ward 2,Cleared,0987654321
